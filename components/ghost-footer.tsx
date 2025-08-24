@@ -17,8 +17,8 @@ export function GhostFooter() {
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        background: #ffffff;
-        border-top: 1px solid #e5e5e5;
+        background: #121212;
+        border-top: 1px solid #333333;
       }
 
       .ghost-title {
@@ -33,7 +33,7 @@ export function GhostFooter() {
         font-size: clamp(0.8rem, 2.5vw, 1.2rem); /* reduced font size slightly */
         font-weight: 900;
         font-family: "Montserrat", sans-serif;
-        color: #000000;
+        color: #ffffff;
         margin: 0;
         white-space: nowrap;
       }
@@ -41,10 +41,10 @@ export function GhostFooter() {
       .ghost {
         width: 6vmin;
         height: 8vmin;
-        background-color: #cccccc;
-        background-image: radial-gradient(ellipse at 35% 40%, #000000 8%, transparent 0%),
-          radial-gradient(ellipse at 65% 40%, #000000 8%, transparent 0%),
-          radial-gradient(ellipse at 50% 60%, #000000 8%, transparent 0%);
+        background-color: #ffffff;
+        background-image: radial-gradient(ellipse at 35% 40%, #121212 8%, transparent 0%),
+          radial-gradient(ellipse at 65% 40%, #121212 8%, transparent 0%),
+          radial-gradient(ellipse at 50% 60%, #121212 8%, transparent 0%);
         border-radius: 100% / 70% 70% 0% 0%;
         transform: translateX(100em) rotateZ(-90deg);
         position: relative;
@@ -65,7 +65,7 @@ export function GhostFooter() {
       .ghost div {
         position: absolute;
         width: 20%;
-        background-color: #cccccc;
+        background-color: #ffffff;
       }
 
       .ghost div:nth-of-type(1) {
@@ -89,7 +89,7 @@ export function GhostFooter() {
         left: 40%;
         bottom: -2.5vmin;
         border-radius: 100% / 0% 0% 60% 60%;
-        background-color: #cccccc;
+        background-color: #ffffff;
       }
 
       .ghost div:nth-of-type(4) {
@@ -101,7 +101,7 @@ export function GhostFooter() {
         left: 80%;
         bottom: -1.8vmin;
         border-radius: 100% / 0% 0% 70% 70%;
-        background-color: #cccccc;
+        background-color: #ffffff;
       }
 
       @media (max-width: 640px) {

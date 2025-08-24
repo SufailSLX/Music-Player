@@ -34,6 +34,7 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
@@ -61,6 +62,17 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    const saved = localStorage.getItem("youtube-recent-searches")
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved))
+      } catch (e) {
+        console.error("Failed to load recent searches:", e)
+      }
+    }
+  }, [])
+
   const fetchSuggestions = async (query: string) => {
     setIsLoadingSuggestions(true)
     try {
@@ -82,6 +94,13 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
     setIsSearching(true)
     setError(null)
     setShowSuggestions(false)
+
+    const trimmedQuery = query.trim()
+    if (trimmedQuery) {
+      const updatedRecent = [trimmedQuery, ...recentSearches.filter((s) => s !== trimmedQuery)].slice(0, 5)
+      setRecentSearches(updatedRecent)
+      localStorage.setItem("youtube-recent-searches", JSON.stringify(updatedRecent))
+    }
 
     try {
       const response = await fetch(`/api/youtube/search?q=${encodeURIComponent(query)}&maxResults=12`)
@@ -115,7 +134,7 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
   }
 
   const handleInputFocus = () => {
-    if (suggestions.length > 0) {
+    if (suggestions.length > 0 || recentSearches.length > 0) {
       setShowSuggestions(true)
     }
   }
@@ -138,44 +157,82 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
       <Card>
         <CardContent className="p-4 sm:p-6">
           <div className="relative" ref={suggestionsRef}>
-            <form onSubmit={handleSearch} className="flex gap-2">
+            <form onSubmit={handleSearch} className="flex gap-2 sm:gap-3">
               <Input
                 type="text"
                 placeholder="Search for music on YouTube..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={handleInputFocus}
-                className="flex-1 text-sm sm:text-base"
+                className="flex-1 text-base sm:text-base h-12 sm:h-10"
               />
-              <Button type="submit" disabled={isSearching} className="text-sm">
+              <Button type="submit" disabled={isSearching} className="text-sm sm:text-base h-12 sm:h-10 px-4 sm:px-6">
                 <Search className="w-4 h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">{isSearching ? "Searching..." : "Search"}</span>
                 <span className="sm:hidden">{isSearching ? "..." : "Go"}</span>
               </Button>
             </form>
 
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Search className="w-3 h-3 text-gray-400" />
-                      <span className="truncate">{suggestion}</span>
+            {showSuggestions && (suggestions.length > 0 || recentSearches.length > 0) && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#121212] border border-gray-700 rounded-md shadow-xl max-h-80 overflow-y-auto">
+                {recentSearches.length > 0 && searchQuery.length === 0 && (
+                  <div className="border-b border-gray-700">
+                    <div className="px-4 py-2 text-xs text-gray-400 font-medium uppercase tracking-wide">
+                      Recent searches
                     </div>
-                  </button>
-                ))}
+                    {recentSearches.map((search, index) => (
+                      <button
+                        key={`recent-${index}`}
+                        onClick={() => handleSuggestionClick(search)}
+                        className="w-full px-4 py-3 text-left text-sm text-white hover:bg-gray-800 focus:bg-gray-800 focus:outline-none transition-colors duration-150"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-4 h-4 text-gray-400">
+                            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                            </svg>
+                          </div>
+                          <span className="truncate flex-1">{search}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {suggestions.length > 0 && (
+                  <div>
+                    {recentSearches.length > 0 && searchQuery.length === 0 && (
+                      <div className="px-4 py-2 text-xs text-gray-400 font-medium uppercase tracking-wide">
+                        Suggestions
+                      </div>
+                    )}
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={`suggestion-${index}`}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full px-4 py-3 text-left text-sm text-white hover:bg-gray-800 focus:bg-gray-800 focus:outline-none transition-colors duration-150 border-b border-gray-800 last:border-b-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="truncate flex-1">{suggestion}</span>
+                          <div className="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {isLoadingSuggestions && searchQuery.length > 1 && (
-              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
-                <div className="px-4 py-2 text-sm text-gray-500 flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b border-gray-400"></div>
-                  Loading suggestions...
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#121212] border border-gray-700 rounded-md shadow-xl">
+                <div className="px-4 py-3 text-sm text-gray-400 flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-[#1DB954]"></div>
+                  <span>Loading suggestions...</span>
                 </div>
               </div>
             )}
@@ -205,9 +262,9 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
 
       {/* Search Results */}
       {searchResults.length > 0 && (
-        <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold">Search Results</h2>
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="space-y-4 sm:space-y-6">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">Search Results</h2>
+          <div className="grid gap-4 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {searchResults.map((video) => (
               <Card
                 key={video.id}
@@ -217,36 +274,39 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
                   <img
                     src={video.thumbnail || "/placeholder.svg"}
                     alt={video.title}
-                    className="w-full h-36 sm:h-48 object-cover"
+                    className="w-full h-40 sm:h-48 object-cover"
                     loading="lazy"
                   />
                   {video.duration && (
                     <Badge className="absolute bottom-2 right-2 bg-black/80 text-white text-xs">{video.duration}</Badge>
                   )}
                 </div>
-                <CardContent className="p-3 sm:p-4">
-                  <h3 className="font-semibold text-sm line-clamp-2 mb-1 leading-tight" title={video.title}>
+                <CardContent className="p-4 sm:p-4">
+                  <h3
+                    className="font-semibold text-sm sm:text-base line-clamp-2 mb-2 leading-tight"
+                    title={video.title}
+                  >
                     {video.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 truncate" title={video.channelTitle}>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-4 truncate" title={video.channelTitle}>
                     {video.channelTitle}
                   </p>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => onVideoSelect(video)} className="flex-1 text-xs sm:text-sm">
-                      <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    <Button size="sm" onClick={() => onVideoSelect(video)} className="flex-1 text-sm min-h-[40px]">
+                      <Play className="w-4 h-4 mr-2" />
                       Play
                     </Button>
                     <Button
                       size="sm"
                       variant={isVideoFavorited(video.id) ? "default" : "outline"}
                       onClick={() => handleFavoriteToggle(video)}
-                      className="px-2 sm:px-3"
+                      className="px-3 min-h-[40px] min-w-[40px]"
                       title={isVideoFavorited(video.id) ? "Already in favorites" : "Add to favorites"}
                     >
                       {isVideoFavorited(video.id) ? (
-                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                        <Heart className="w-4 h-4 fill-current" />
                       ) : (
-                        <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <Heart className="w-4 h-4" />
                       )}
                     </Button>
                   </div>
@@ -259,10 +319,10 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
 
       {/* Empty State */}
       {searchResults.length === 0 && !isSearching && !error && (
-        <div className="text-center py-8 sm:py-12">
-          <Search className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-          <h3 className="text-base sm:text-lg font-semibold mb-2">Search for Music</h3>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+        <div className="text-center py-12 sm:py-16">
+          <Search className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-4 sm:mb-6" />
+          <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3">Search for Music</h3>
+          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-md mx-auto px-4">
             Enter a song name, artist, or any music-related search term to find videos on YouTube.
           </p>
         </div>
@@ -270,9 +330,9 @@ export function YouTubeSearch({ onVideoSelect, onAddToFavorites, favorites }: Yo
 
       {/* Loading State */}
       {isSearching && (
-        <div className="text-center py-8 sm:py-12">
-          <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary mx-auto mb-3 sm:mb-4"></div>
-          <p className="text-sm sm:text-base text-muted-foreground">Searching YouTube...</p>
+        <div className="text-center py-12 sm:py-16">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-primary mx-auto mb-4 sm:mb-6"></div>
+          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">Searching YouTube...</p>
         </div>
       )}
     </div>

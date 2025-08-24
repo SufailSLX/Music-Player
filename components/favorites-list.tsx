@@ -23,10 +23,10 @@ interface FavoritesListProps {
 export function FavoritesList({ favorites, currentVideo, onVideoSelect, onRemoveFromFavorites }: FavoritesListProps) {
   if (favorites.length === 0) {
     return (
-      <div className="text-center py-8 sm:py-12">
-        <Heart className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-        <h3 className="text-base sm:text-lg font-semibold mb-2">No Favorites Yet</h3>
-        <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+      <div className="text-center py-12 sm:py-16">
+        <Heart className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-4 sm:mb-6" />
+        <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3">No Favorites Yet</h3>
+        <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-md mx-auto px-4">
           Search for music and add videos to your favorites to see them here.
         </p>
       </div>
@@ -34,14 +34,14 @@ export function FavoritesList({ favorites, currentVideo, onVideoSelect, onRemove
   }
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg sm:text-xl font-semibold">My Favorites</h2>
-        <Badge variant="secondary" className="text-xs sm:text-sm">
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold">My Favorites</h2>
+        <Badge variant="secondary" className="text-sm sm:text-base px-3 py-1">
           {favorites.length} {favorites.length === 1 ? "song" : "songs"}
         </Badge>
       </div>
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-4 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {favorites.map((video) => (
           <Card
             key={video.id}
@@ -53,7 +53,7 @@ export function FavoritesList({ favorites, currentVideo, onVideoSelect, onRemove
               <img
                 src={video.thumbnail || "/placeholder.svg"}
                 alt={video.title}
-                className="w-full h-36 sm:h-48 object-cover"
+                className="w-full h-40 sm:h-48 object-cover"
                 loading="lazy"
               />
               {video.duration && (
@@ -61,37 +61,37 @@ export function FavoritesList({ favorites, currentVideo, onVideoSelect, onRemove
               )}
               {currentVideo?.id === video.id && (
                 <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                  <Badge className="bg-primary text-primary-foreground text-xs sm:text-sm font-medium">
+                  <Badge className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1">
                     Now Playing
                   </Badge>
                 </div>
               )}
             </div>
-            <CardContent className="p-3 sm:p-4">
-              <h3 className="font-semibold text-sm line-clamp-2 mb-1 leading-tight" title={video.title}>
+            <CardContent className="p-4 sm:p-4">
+              <h3 className="font-semibold text-sm sm:text-base line-clamp-2 mb-2 leading-tight" title={video.title}>
                 {video.title}
               </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3 truncate" title={video.channelTitle}>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4 truncate" title={video.channelTitle}>
                 {video.channelTitle}
               </p>
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   onClick={() => onVideoSelect(video)}
-                  className="flex-1 text-xs sm:text-sm"
+                  className="flex-1 text-sm min-h-[40px]"
                   disabled={currentVideo?.id === video.id}
                 >
-                  <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <Play className="w-4 h-4 mr-2" />
                   {currentVideo?.id === video.id ? "Playing" : "Play"}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => onRemoveFromFavorites(video.id)}
-                  className="px-2 sm:px-3"
+                  className="px-3 min-h-[40px] min-w-[40px]"
                   title="Remove from favorites"
                 >
-                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
