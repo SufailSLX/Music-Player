@@ -12,16 +12,19 @@ export async function GET(request: NextRequest) {
   const apiKey = process.env.YOUTUBE_API_KEY
 
   if (!apiKey) {
+    console.error("YouTube API key not found in environment variables")
     return NextResponse.json(
       {
         error: "YouTube API key not configured",
-        message: "Please add YOUTUBE_API_KEY to your environment variables",
+        message: "Please add YOUTUBE_API_KEY to your .env.local file",
       },
       { status: 500 },
     )
   }
 
   try {
+    console.log("[v0] Making YouTube API search request for query:", query)
+
     const response = await fetch(
       `https://www.googleapis.com/youtube/v3/search?` +
         new URLSearchParams({
@@ -35,17 +38,20 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
-      throw new Error(`YouTube API error: ${response.status}`)
+      const errorText = await response.text()
+      console.error("[v0] YouTube API error response:", response.status, errorText)
+      throw new Error(`YouTube API error: ${response.status} - ${errorText}`)
     }
 
     const data = await response.json()
+    console.log("[v0] YouTube search successful, found", data.items?.length || 0, "videos")
 
-    // Get video durations
+    // Get video durations and additional details
     const videoIds = data.items.map((item: any) => item.id.videoId).join(",")
     const detailsResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?` +
         new URLSearchParams({
-          part: "contentDetails",
+          part: "contentDetails,statistics",
           id: videoIds,
           key: apiKey,
         }),
@@ -55,7 +61,10 @@ export async function GET(request: NextRequest) {
 
     // Format the results
     const videos = data.items.map((item: any, index: number) => {
-      const duration = detailsData.items[index]?.contentDetails?.duration
+      const details = detailsData.items[index]
+      const duration = details?.contentDetails?.duration
+      const viewCount = details?.statistics?.viewCount
+
       return {
         id: item.id.videoId,
         title: item.snippet.title,
@@ -63,14 +72,19 @@ export async function GET(request: NextRequest) {
         thumbnail: item.snippet.thumbnails.medium.url,
         duration: formatDuration(duration),
         publishedAt: item.snippet.publishedAt,
+        viewCount: viewCount ? Number.parseInt(viewCount) : undefined,
       }
     })
 
     return NextResponse.json({ videos })
   } catch (error) {
-    console.error("YouTube API error:", error)
+    console.error("[v0] YouTube API error:", error)
     return NextResponse.json(
-      { error: "Failed to search YouTube", message: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Failed to search YouTube",
+        message: error instanceof Error ? error.message : "Unknown error",
+        details: "Check your API key and ensure YouTube Data API v3 is enabled",
+      },
       { status: 500 },
     )
   }
