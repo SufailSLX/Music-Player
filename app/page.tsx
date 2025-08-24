@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { YouTubeSearch } from "@/components/youtube-search"
 import { YouTubePlayer } from "@/components/youtube-player"
 import { FavoritesList } from "@/components/favorites-list"
+import { GhostFooter } from "@/components/ghost-footer"
 import { Music, LogOut, Search, Heart } from "lucide-react"
 
 interface YouTubeVideo {
@@ -150,7 +151,7 @@ export default function YouTubeMusicApp() {
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center">
               <Music className="w-4 h-4 sm:w-6 sm:h-6 text-primary-foreground" />
             </div>
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">YouTube Music</h1>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{"Liminis Play"}</h1>
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
@@ -211,6 +212,9 @@ export default function YouTubeMusicApp() {
 
       {/* YouTube Player */}
       {currentVideo && <YouTubePlayer video={currentVideo} favorites={favorites} onVideoChange={handleVideoSelect} />}
+
+      {/* Ghost Footer */}
+      <GhostFooter />
     </div>
   )
 }
