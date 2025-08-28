@@ -6,7 +6,7 @@
 
 
 ## Deployment
-project is live at: v0-empty-conversation-slx-dev.vercel.app
+project is live at:[ v0-empty-conversation-slx-dev.vercel.app](https://v0-empty-conversation-slx-dev.vercel.app/)
 
 
 ****
