@@ -6,7 +6,8 @@
 
 
 ## Deployment
-project is live at:
+project is live at: v0-empty-conversation-slx-dev.vercel.app
+
 
 ****
 
