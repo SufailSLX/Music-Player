@@ -66,7 +66,6 @@ function generateFallbackSuggestions(query: string): string[] {
       suggestions.push(`${query} ${keyword}`)
     }
   })
-
   // Add some popular music-related completions
   if (query.length > 2) {
     suggestions.push(`${query} official music video`, `${query} lyrics`, `${query} cover`, `${query} live performance`)
