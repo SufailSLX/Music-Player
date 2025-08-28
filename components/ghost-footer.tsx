@@ -150,7 +150,7 @@ export function GhostFooter() {
   return (
     <footer className="ghost-container">
       <div className="ghost-title">
-        <h1>Powered by SLX.dev</h1>
+        <h1>Powered by SLX.Dev</h1>
       </div>
       <div className="ghost">
         <div></div>
